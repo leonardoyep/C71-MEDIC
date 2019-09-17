@@ -62,10 +62,9 @@ public class MedicActivity extends AppCompatActivity {
 
         btnGoToPrinter.setOnClickListener(this::onClick);
 
-        etNomePaciente.setText("Daniel Paciente");
+        etNomePaciente.setText("Leonardo Duarte");
         etTipoExame.setText("Exame de sangue");
-        etDescricao.setText("Paciente estava sofrendo problemas no organismo devido a alta quantidade de gadisse inserida \n" +
-                "mas agora\njá esta se sentindo\nbem melhor do que nunca\npois conquistou a\nM\nO\nR\nE\nN\nA\n<3");
+        etDescricao.setText("Paciente constava com febre leve, mas passa bem. Deve tomar dipirona de 12 em 12 horas");
     }
 
     private void setTextos(){
@@ -93,11 +92,16 @@ public class MedicActivity extends AppCompatActivity {
                 exame = userName + " \n";
                 exame = exame + etNomePaciente.getText().toString() + " \n";
                 exame = exame + etTipoExame.getText().toString() + " \n";
-                exame = exame + etDescricao.getText().toString() + " \n";
+                exame = exame + etDescricao.getText().toString() + " \n\n";
+                exame = exame + "__________________\n";
+                exame = exame + "ASSINATURA\n";
+                exame = exame + "___________________\n\n";
                 //Toast.makeText(this, "EXAME: " +exame, Toast.LENGTH_SHORT).show();
+                String descricaoSemQuebraDeLinha = "";
+                descricaoSemQuebraDeLinha = etDescricao.getText().toString().replace(System.getProperty("line.separator"), "¬");
                 String laudoMedico = "NOME:" + etNomePaciente.getText().toString() +"£"
                                     + "TIPOEXAME:" + etTipoExame.getText().toString() +"£"
-                                    + "DESCRICAO:" + etDescricao.getText().toString() +";";
+                                    + "DESCRICAO:" + descricaoSemQuebraDeLinha +";";
 
                 click_Salvar(laudoMedico);
 

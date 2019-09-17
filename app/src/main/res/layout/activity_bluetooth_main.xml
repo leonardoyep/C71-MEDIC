@@ -26,4 +26,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="80dp"
         android:text="Desconectar Impressora"></Button>
+
+    <Button
+        android:id="@+id/btnGoToMainMenuByPrinter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:text="Voltar para o menu principal"></Button>
+
 </LinearLayout>

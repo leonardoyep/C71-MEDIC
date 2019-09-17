@@ -21,6 +21,7 @@ import com.mazenrashed.printooth.data.printable.TextPrintable;
 import com.mazenrashed.printooth.data.printer.DefaultPrinter;
 import com.mazenrashed.printooth.utilities.Printing;
 import com.zebra.printstationcard.R;
+import com.zebra.printstationcard.fingerprint.FirstActivity;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -33,7 +34,7 @@ public class BluetoothMainActivity extends Activity implements Runnable {
     protected static final String TAG = "TAG";
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
-    Button mScan, mPrint, mDisc;
+    Button mScan, mPrint, mDisc, btnGoToMainMenu;
     BluetoothAdapter mBluetoothAdapter;
     private UUID applicationUUID = UUID
             .fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -53,7 +54,7 @@ public class BluetoothMainActivity extends Activity implements Runnable {
         Bundle extras = getIntent().getExtras();
         if(extras != null){
             imprimirString = extras.getString("imprimir");
-            Toast.makeText(this, "Result: " + imprimirString, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Result: " + imprimirString, Toast.LENGTH_SHORT).show();
         }
 
         mScan.setOnClickListener(new View.OnClickListener() {
@@ -86,6 +87,9 @@ public class BluetoothMainActivity extends Activity implements Runnable {
                         try {
                             OutputStream os = mBluetoothSocket
                                     .getOutputStream();
+                            String toPrint = "";
+                            toPrint = imprimirString;
+                            toPrint = toPrint + "\n\n\n";
                             /*String imprimirString = "";
                                  // "TAMANHO DA STRING"
                                  // "---------------------"
@@ -101,12 +105,13 @@ public class BluetoothMainActivity extends Activity implements Runnable {
                                     "STRING PRESCRIÇÃO\n" +
                                     "_____________________\n" +*/
                             //BILL = BILL + String.format("%1$-10s %2$10s %3$13s %4$10s", "Item", "Qty", "Rate", "Totel");
-                            imprimirString = imprimirString +
+                            /*imprimirString = imprimirString +
                                     "-----------------------------------------------\n" +
                                     "     ASSINATURA\n" ;
 
                             imprimirString = imprimirString
                                     + "-----------------------------------------------\n";
+                             */
                             //Toast.makeText(BluetoothMainActivity.this, "Text: " + imprimirString, Toast.LENGTH_SHORT).show();
 
 /*
@@ -131,7 +136,7 @@ public class BluetoothMainActivity extends Activity implements Runnable {
                             BILL = BILL + "\n\n ";
 
                             */
-                            os.write(imprimirString.getBytes());
+                            os.write(toPrint.getBytes());
                             //This is printer specific code you can comment ==== > Start
 
                             // Setting height
@@ -157,7 +162,7 @@ public class BluetoothMainActivity extends Activity implements Runnable {
                     }
                 };
 
-                Toast.makeText(BluetoothMainActivity.this, "Working 2", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(BluetoothMainActivity.this, "Working 2", Toast.LENGTH_SHORT).show();
                 t.start();
             }
         });
@@ -167,6 +172,17 @@ public class BluetoothMainActivity extends Activity implements Runnable {
             public void onClick(View mView) {
                 if (mBluetoothAdapter != null)
                     mBluetoothAdapter.disable();
+            }
+        });
+
+        btnGoToMainMenu = (Button) findViewById(R.id.btnGoToMainMenuByPrinter);
+        btnGoToMainMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mBluetoothAdapter != null)
+                    mBluetoothAdapter.disable();
+                Intent mainMenuIntent = new Intent(BluetoothMainActivity.this, FirstActivity.class);
+                startActivity(mainMenuIntent);
             }
         });
 
@@ -233,7 +249,7 @@ public class BluetoothMainActivity extends Activity implements Runnable {
                     mBluetoothDevice = mBluetoothAdapter
                             .getRemoteDevice(mDeviceAddress);
                     mBluetoothConnectProgressDialog = ProgressDialog.show(this,
-                            "Connecting...", mBluetoothDevice.getName() + " : "
+                            "Conectando com...", mBluetoothDevice.getName() + " : "
                                     + mBluetoothDevice.getAddress(), true, false);
                     Thread mBlutoothConnectThread = new Thread(this);
                     mBlutoothConnectThread.start();
@@ -260,7 +276,7 @@ public class BluetoothMainActivity extends Activity implements Runnable {
                 .getBondedDevices();
         if (mPairedDevices.size() > 0) {
             for (BluetoothDevice mDevice : mPairedDevices) {
-                Log.v(TAG, "PairedDevices: " + mDevice.getName() + "  "
+                Log.v(TAG, "Impressoras conectadas: " + mDevice.getName() + "  "
                         + mDevice.getAddress());
             }
         }
@@ -293,7 +309,7 @@ public class BluetoothMainActivity extends Activity implements Runnable {
         @Override
         public void handleMessage(Message msg) {
             mBluetoothConnectProgressDialog.dismiss();
-            Toast.makeText(BluetoothMainActivity.this, "DeviceConnected", Toast.LENGTH_SHORT).show();
+            Toast.makeText(BluetoothMainActivity.this, "Impressora conectada", Toast.LENGTH_SHORT).show();
         }
     };
 

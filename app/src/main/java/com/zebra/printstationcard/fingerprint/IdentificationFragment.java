@@ -174,6 +174,7 @@ public class IdentificationFragment extends KeyDwonFragment implements View.OnCl
                         //Toast.makeText(mContext, "User is PACIENT", Toast.LENGTH_SHORT).show();
                         Intent pacientIntent = new Intent(mContext, PacientActivity.class);
                         pacientIntent.putExtra("userName" , userName);
+                        pacientIntent.putExtra("userSobrenome", userSobrenome);
                         pacientIntent.putExtra("userID", userID);
                         startActivity(pacientIntent);
                     }
@@ -259,6 +260,7 @@ public class IdentificationFragment extends KeyDwonFragment implements View.OnCl
             arq = new File(Environment.getExternalStoragePublicDirectory("ProjetoMedico"), "usuarios.txt");
             BufferedReader br = new BufferedReader(new FileReader(arq));
 
+
             String[] dataStringSplited = {};
             String[] dataUserSplited = {};
 
@@ -273,7 +275,7 @@ public class IdentificationFragment extends KeyDwonFragment implements View.OnCl
                     }
                 }
             }
-            //Toast.makeText(mContext, "TAMANHO: "  + dataUserSplited.length, Toast.LENGTH_LONG).show();
+            //Toast.makeText(mContext, "ALL: "  + allMessage, Toast.LENGTH_LONG).show();
             if(datas != null){
                 for(String dataInfos : datas){
                     if(dataInfos.contains("ID")){

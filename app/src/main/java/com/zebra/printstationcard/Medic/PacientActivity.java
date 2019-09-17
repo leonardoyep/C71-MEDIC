@@ -1,5 +1,6 @@
 package com.zebra.printstationcard.Medic;
 
+import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,10 +11,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.zebra.printstationcard.BluetoothPrinter.BluetoothMainActivity;
 import com.zebra.printstationcard.R;
 
 import java.io.BufferedReader;
@@ -29,13 +32,18 @@ public class PacientActivity extends AppCompatActivity {
     private TextView tvDescricao, tvOlaPaciente;
     private ListView listViewPaciente;
     private Button btnMostrarExames;
+    private Button btnImrpimirExame;
+    private ScrollView scrollDescricao;
 
     ArrayList<String> listaConsultas = new ArrayList<>();
     ArrayList<String> listaDescricoes = new ArrayList<>();
 
     private String userName = "";
     private String userID = "";
+    private String userSobrenome = "";
     private String dados[] = new String[]{"Exame esta tudo bem", "somente frebe leve", "vai morrer logo", "apesar de passar bem, passa mal"};
+
+    private int consultaIndex = -1;
 
     //Historico de consultas
     @Override
@@ -47,19 +55,45 @@ public class PacientActivity extends AppCompatActivity {
         tvOlaPaciente = (TextView) findViewById(R.id.tvOlaPaciente);
         listViewPaciente = (ListView) findViewById(R.id.listViewPaciente);
         btnMostrarExames = (Button) findViewById(R.id.btnMostrarExames);
+        scrollDescricao = (ScrollView) findViewById(R.id.scrollDescricao);
+        btnImrpimirExame = (Button) findViewById(R.id.btnImprimirExame);
 
         btnMostrarExames.setVisibility(View.GONE);
+        scrollDescricao.setVisibility((View.GONE));
+        btnImrpimirExame.setVisibility(View.GONE);
 
         btnMostrarExames.setOnClickListener(view -> {
+            scrollDescricao.setVisibility((View.GONE));
             listViewPaciente.setVisibility(View.VISIBLE);
             btnMostrarExames.setVisibility(View.GONE);
+            btnImrpimirExame.setVisibility(View.GONE);
             tvDescricao.setVisibility(View.GONE);
+            consultaIndex = -1;
+        });
+
+        btnImrpimirExame.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent printIntent = new Intent(PacientActivity.this, BluetoothMainActivity.class);
+                if(consultaIndex!= -1){
+                    //printIntent.putExtra("userExame", listaConsultas.get(consultaIndex));
+                    //printIntent.putExtra("userDescricao", listaDescricoes.get(consultaIndex));
+                    String imprimir = listaConsultas.get(consultaIndex) + "\n" +
+                            listaDescricoes.get(consultaIndex) + "\n";
+                    printIntent.putExtra("imprimir", imprimir);
+                    startActivity(printIntent);
+                }
+                else{
+                    Toast.makeText(PacientActivity.this, "Alguma coisa deu errado com a impressão das consultas", Toast.LENGTH_SHORT).show();
+                }
+            }
         });
 
         Bundle extras = getIntent().getExtras();
         if(extras != null){
             userName = extras.getString("userName");
             userID = extras.getString("userID");
+            userSobrenome = extras.getString("userSobrenome");
         }
         tvOlaPaciente.setText("Ola, " + userName);
         /*
@@ -81,8 +115,12 @@ public class PacientActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 tvDescricao.setText(listaDescricoes.get(i));{
+                    //Toast.makeText(PacientActivity.this, listaDescricoes.get(i), Toast.LENGTH_SHORT).show();
+                    consultaIndex = i;
                     listViewPaciente.setVisibility(View.GONE);
+                    scrollDescricao.setVisibility((View.VISIBLE));
                     btnMostrarExames.setVisibility(View.VISIBLE);
+                    btnImrpimirExame.setVisibility(View.VISIBLE);
                     tvDescricao.setVisibility(View.VISIBLE);
                 }
             }
@@ -107,6 +145,8 @@ public class PacientActivity extends AppCompatActivity {
             String[] dataStringSplited = {};
             String[] dataUserSplited = {};
 
+            String allMessage = "";
+
             while ((lstrlinha = br.readLine()) != null)
             {
                 dataStringSplited = lstrlinha.split(";");
@@ -114,15 +154,19 @@ public class PacientActivity extends AppCompatActivity {
                     dataUserSplited = dataString.split("£");
                     for(String userString : dataUserSplited){
                         datas.add(userString);
+
+                        //allMessage = allMessage + userString + "<!>";
                     }
                 }
             }
-            //Toast.makeText(mContext, "TAMANHO: "  + dataUserSplited.length, Toast.LENGTH_LONG).show();
+            //Toast.makeText(PacientActivity.this, "ALL: "  + allMessage, Toast.LENGTH_LONG).show();
+            //listaConsultas.add(allMessage);
+            //listaDescricoes.add(allMessage);
             int count = 0;
             if(datas != null){
                 for(String dataInfos : datas){
                     count++;
-                    if(dataInfos.equals("NOME:"+userName)){
+                    if(dataInfos.equals("NOME:"+userName + " " + userSobrenome)){
                         //Toast.makeText(this, "Here i go: " + dataInfos + " NOMESS: " + (dataInfos.substring(dataInfos.lastIndexOf(":") + 1)), Toast.LENGTH_SHORT).show();
                         //if((dataInfos.substring(dataInfos.lastIndexOf(":") + 1)).equals(userName))
                         //tvTest.setText("USER ID AQUI: >> " + dataInfos + "Plus TEST: " + datas.indexOf(dataInfos) + " PROXIMO E NOME : " + datas.get(datas.indexOf(dataInfos)+1));
@@ -146,7 +190,16 @@ public class PacientActivity extends AppCompatActivity {
                         listaConsultas.add(infoSubstring);
                         info = datas.get(count+1);
                         infoSubstring = info.substring(info.lastIndexOf(":") + 1);
-                        listaDescricoes.add(infoSubstring);
+                        String replaceString = "";
+                        if(infoSubstring.contains("¬")){
+                            replaceString = infoSubstring.replace("¬", "\n");
+                            listaDescricoes.add(replaceString);
+                        }
+                        else{
+                            listaDescricoes.add(infoSubstring);
+                        }
+                        //Toast.makeText(this, "This: " + infoSubstring, Toast.LENGTH_SHORT).show();
+
                     }
                 }
             }
